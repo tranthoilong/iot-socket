@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+    <script src="/config.js"></script>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    <input type="text" id="messageInput" placeholder="Enter your message">
+    <button onclick="sendMessage()">Send</button>
+    <div id="messages"></div>
+
+    <script>
+        const ws = new WebSocket("iot-socket.vercel.app");
+
+        ws.onopen = () => {
+            document.getElementById('messages').innerHTML += '<p>Connected to server</p>';
+        };
+
+        ws.onmessage = (event) => {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const text = reader.result;
+                console.log('Received:', text);
+                document.getElementById('messages').innerHTML += `<p>Received: ${text}</p>`;
+            };
+            reader.readAsText(event.data);
+        };
+
+        ws.onclose = () => {
+            document.getElementById('messages').innerHTML += '<p>Disconnected from server</p>';
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (message) {
+                ws.send(message);
+                document.getElementById('messages').innerHTML += `<p>Sent: ${message}</p>`;
+                input.value = '';
+            } else {
+                console.log('Attempted to send an empty message');
+            }
+        }
+    </script>
+</body>
+</html>
